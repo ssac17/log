@@ -39,7 +39,7 @@ interrupt의 뜻 : 방해하다, 중단하다
 
 - - -
 
-### code
+#### code
 기본 코드
 ```java
 try {
