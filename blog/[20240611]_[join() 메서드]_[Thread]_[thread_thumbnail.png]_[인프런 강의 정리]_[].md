@@ -1,0 +1,124 @@
+# join
+
+* join() 메서드는 한 스레드가 다른 스레드가 종료될 때까지 실행을 중지하고 대기상태에 들어갔다가 스레드가 종료되면 실행대기 상태로 전환됩니다.
+* 스레드의 순서를 제어하거나 다른 스레드의 작업을 기다려야 한거나 순차적인 흐름을 구성하고자 할대 사용할수 있습니다.
+* Object클래스의 wait() 네이티브 메서드로 연결되며 시스템 콜을 통해 커널모드로 수행합니다. 내부적으로 wait() & notify() 흐름을 가지고 제어합니다.
+
+## API 및 예외
+**void join() throws InterruptedException**
+* 스레드의 작업이 정료될 때까지 대기 상태를 유지합니다.
+
+**void join(long millis) throws InterruptedException**
+* 지정한 밀리초 시간 동안 스레드의 대기 상태를 유지합니다.
+* 밀리초에 대한 인수 값은 음수가 될수 없으며 음수일 경우 IllegalArgumentException이 발생합니다.
+
+**void join(long millis, int nanos) throws InterruptedException**
+* 지정한 밀리초에 나노초를 더한 시간 동안 스레드의 대기 상태를 유지합니다.
+* 나노초의 범위는 0 에서 999999 입니다.
+
+**InterruptedException**
+* 스레드가 인터럽트 될 경우 InterruptedException 예외가 발생합니다.
+* 다른 스레드가 join()을 수행중인 스레드에게 인터럽트, 즉 중단(멈춤) 신호를 보낼수 있습니다.
+* InterruptedException 예외가 발생하면 스레드는 대기상태에서 실행대기 상태로 전화되어 실행상태를 기다립니다.
+
+## join() 작동방식
+#### wait() & notify()
+![join](./img/thread/join.png)
+
+#### interrupt() 발생
+![join_interrupt](./img/thread/join_interrupt.png)
+
+
+- - - 
+
+#### code
+기본코드
+```java
+Thread thread = new Thread(() -> {
+    try {
+        System.out.println("스레드가 3초 동안 작동");
+        Thread.sleep(3000);
+        System.out.println("스레드 작동 완료");
+    } catch (InterruptedException e) {
+        e.printStackTrace(System.out);
+    }
+});
+
+thread.start();
+System.out.println("메인 스레드가 다른 스레드의 완료를 기다립니다");
+
+try {
+    thread.join();
+} catch (InterruptedException e) {
+    throw new RuntimeException(e);
+}
+System.out.println("메인 스레드가 계속 진행 합니다");
+
+//메인 스레드가 다른 스레드의 완료를 기다립니다
+//스레드가 3초 동안 작동
+//스레드 작동 완료
+//메인 스레드가 계속 진행 합니다
+```
+
+  
+join
+```java
+//메인스레드
+Thread mainThread = Thread.currentThread();
+
+Thread runningThread = new Thread(() -> {
+    try {
+        for (int i = 0; i < 10; i++) {
+            System.out.println("runningThread가 계속 실행 중..");
+            Thread.sleep(1000);
+        }
+    } catch (InterruptedException e) {
+        //interruptingThread에서 해당 스레드에 인터럽트로 InterruptedException 발생
+        mainThread.interrupt();
+        System.out.println("스레드가 인터럽트 되었습니다");
+    }
+});
+
+runningThread.start();
+
+Thread interruptingThread = new Thread(() -> {
+    try {
+        System.out.println("인터럽트 스레드가 2초 후에 RunningThread를 인터럽트 합니다");
+        Thread.sleep(2000);
+        runningThread.interrupt();
+    } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+    }
+});
+
+interruptingThread.start();
+
+try {
+    System.out.println("메인 스레드가 runningThread의 완료를 기다립니다");
+    runningThread.join();
+    System.out.println("메인 스레드 종료");
+} catch (InterruptedException e) {
+    System.out.println("메인 스레드가 인터럽트 되었습니다");
+    throw new RuntimeException(e);
+}
+
+
+//runningThread가 계속 실행 중..
+//메인 스레드가 runningThread의 완료를 기다립니다
+//인터럽트 스레드가 2초 후에 RunningThread를 인터럽트 합니다
+//runningThread가 계속 실행 중..
+//스레드가 인터럽트 되었습니다
+//메인 스레드가 인터럽트 되었습니다
+//Exception in thread "main" java.lang.RuntimeException: java.lang.InterruptedException ...
+```
+
+## join() 작동 방식 원리
+> * join()을 실행하면 OS 스케줄러는 join()을 호출한 스레드를 대기 상태로 전환하고 호출 대상 스레드에게 CPU를 사용하도록 한다.
+> * 호출 대상 스레드의 작업이 종료되면 join()을 호출한 스레드는 실행 대기 상태로 전환되고 CPU가 실행을 재개할 때까지 기다린다.
+> * join()을 호출한 스레드가 실행 대기에서 실행 상태가 되면 그 스레드는 남은 지정부터 실행을 다시 시작한다.
+> * 호출 대상 스레드가 여러 개일 경우 각 스레드의 작업이 종료될 때까지 join()을 호출한 스레드는 대기와 실행을 재개하는 흐름으로 반복한다.
+> * join()을 호출한 스레드가 인터럽트 되면 해당 스레드는 대기에서 해제되고 실행상태로 전환되어 예외를 처리하게 된다.
+> 
+
+출처 - 
+ [자바 동시성 프로그래밍 \[리액티브 프로그래밍 Part.1\] | 정수원 - 인프런](https://www.inflearn.com/course/%EC%9E%90%EB%B0%94-%EB%8F%99%EC%8B%9C%EC%84%B1-%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D-%EB%A6%AC%EC%95%A1%ED%8B%B0%EB%B8%8C-part1/dashboard)
