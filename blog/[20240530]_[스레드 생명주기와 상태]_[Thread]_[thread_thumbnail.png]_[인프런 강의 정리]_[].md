@@ -117,7 +117,7 @@ thread.start(); //스레드 상태: RUNNABLE ...
 ```
 <br/><br/>
 
-대기 중인 경우
+대기 중인 상태
 ```java
 Object object = new Object();
 
@@ -139,7 +139,7 @@ System.out.println("스레드 상태: " + thread.getState()); //스레드 상태
 ```
 <br/><br/>
 
-대기(명시적) 중인 경우
+대기(명시적) 중인 상태
 ```java
 Thread thread = new Thread(new Runnable() {
     @Override
@@ -158,7 +158,7 @@ System.out.println("스레드 상태: " + thread.getState()); //스레드 상태
 ```
 <br/><br/>
 
-차단된 경우
+차단된 상태
 ```java
 Object object = new Object();
 
@@ -191,7 +191,7 @@ System.out.println("스레드 상태: " + thread2.getState()); //스레드 상�
 ```
 <br/><br/>
 
-종료된 경우
+종료된 상태
 ```java
 Thread thread = new Thread(new Runnable() {
     @Override
