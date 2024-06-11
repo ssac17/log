@@ -7,9 +7,11 @@
 **static sleep(long millis) throws InterruptedException**
 * 지정한 밀리초 시간 동안 스레드를 수면 상태로 만듭니다.
 * 밀리초에 대한 인수 값은 음수가 될수 없으며 음수 일 경우 IllegalArgumentException이 발생합니다.
+
 **static sleep(long millis, int nanos) throws InterruptedException**
 * 지정한 밀리초에 나노초를 더한 시간 동안 스레드를 수면 상태로 만듭니다.
 * 나노초의 범위는 0에서 999999 입니다.
+
 **InterruptedException**
 * 스레드가 수면 중에 인터럽트 될 경우 InterruptedException 예외를 발생 합니다.
 * 다른 스레드는 잠자고 있는 스레드에게 인터럽트, 즉 중단(멈춤) 신호를 보낼수 있습니다.
