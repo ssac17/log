@@ -17,8 +17,8 @@
 
 ## Sleep() 작동방식
 
-### 지정된 시간이 지남
+#### 지정된 시간이 지남
 
 ![sleep](./img/thread/sleep.png)
 
-### interrupt() 발생시
+interrupt() 발생시
