@@ -127,12 +127,14 @@ hread thread = new Thread(() -> {
 InterruptedException 발생 시
 ```java
 Thread thread = new Thread(() -> {
-            System.out.println("처음 인터럽트 상태: " + Thread.currentThread().isInterrupted());
+            boolean currentThread = Thread.currentThread().isInterrupted();
+            System.out.println("처음 인터럽트 상태: " + currentThread);
+            
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 //예외 발생하면 인터럽트가 초기화, false
-                System.out.println("예외 발생 후, 인터럽트 상태: " + Thread.currentThread().isInterrupted());
+                System.out.println("예외 발생 후, 인터럽트 상태: " + currentThread);
                 Thread.currentThread().interrupt();
                 throw new RuntimeException(e);
             }
